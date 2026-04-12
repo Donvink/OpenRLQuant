@@ -102,33 +102,40 @@ def build_vec_env(feature_store, symbols, n_envs=4, mode="train", env_kwargs=Non
 def train_mlp(feature_store, symbols, total_timesteps=300_000, n_envs=2,
               save_dir="models", experiment_name="ppo_mlp"):
     from stable_baselines3 import PPO
-    from train.callbacks import TradingEvalCallback, CheckpointCallback, MetricsLoggerCallback
+    from train.callbacks import TradingEvalCallback, CheckpointCallback, MetricsLoggerCallback, EarlyStoppingCallback
 
     logger.info("="*60 + "\nTRAINING: PPO + MLP Policy\n" + "="*60)
 
     env_kwargs = dict(initial_capital=1_000_000, lookback_window=30,
-                      episode_length=126, reward_type="sharpe",
-                      drawdown_penalty=0.3, turnover_penalty=0.01,
+                      episode_length=126, reward_type="log_return", # sharpe is too noisy for short episodes
+                      drawdown_penalty=0.1, turnover_penalty=0.005,
                       transaction_cost_bps=5.0)
 
     train_env = build_vec_env(feature_store, symbols, n_envs, "train", env_kwargs)
-    val_env   = TradingEnv(feature_store=feature_store, symbols=symbols, mode="val", **env_kwargs)
+    val_env = TradingEnv(feature_store=feature_store, symbols=symbols, mode="val", **env_kwargs)
 
     model = PPO("MlpPolicy", train_env,
-                learning_rate=3e-4, n_steps=max(1024//n_envs, 64),
-                batch_size=64, n_epochs=10, gamma=0.99, gae_lambda=0.95,
-                clip_range=0.2, ent_coef=0.005, vf_coef=0.5, max_grad_norm=0.5,
-                policy_kwargs={"net_arch": dict(pi=[256,128], vf=[256,128])},
+                learning_rate=3e-4, n_steps=max(1024//n_envs, 128),
+                batch_size=64, n_epochs=3, gamma=0.99, gae_lambda=0.95,
+                clip_range=0.2, ent_coef=0.01, vf_coef=0.5, max_grad_norm=0.5,
+                policy_kwargs={"net_arch": dict(pi=[128,64], vf=[128,64])},
                 tensorboard_log=str(LOG_DIR/"tensorboard"), verbose=1)
 
     callbacks = [
-        TradingEvalCallback(val_env, eval_freq=max(5_000//n_envs,500),
-                            n_eval_episodes=5, save_path=str(Path(save_dir)/"checkpoints"),
+        TradingEvalCallback(val_env,
+                            eval_freq=max(2_000//n_envs, 500),
+                            n_eval_episodes=5,
+                            save_path=str(Path(save_dir)/"checkpoints"),
                             best_model_name=f"{experiment_name}_best"),
-        CheckpointCallback(save_freq=max(20_000//n_envs,2000),
-                           save_path=str(Path(save_dir)/"checkpoints"),
-                           name_prefix=experiment_name),
+        CheckpointCallback(save_freq=max(20_000//n_envs, 2000),
+                        save_path=str(Path(save_dir)/"checkpoints"),
+                        name_prefix=experiment_name),
         MetricsLoggerCallback(log_freq=500),
+        EarlyStoppingCallback(
+            monitor="eval/mean_sharpe",
+            patience=8,
+            min_delta=0.01,
+        ),
     ]
 
     tracker = ExperimentTracker(experiment_name)
@@ -160,8 +167,8 @@ def train_transformer(feature_store, symbols, total_timesteps=1_000_000, n_envs=
 
     lookback = 30
     env_kwargs = dict(initial_capital=1_000_000, lookback_window=lookback,
-                      episode_length=252, reward_type="sharpe",
-                      drawdown_penalty=0.5, turnover_penalty=0.01, transaction_cost_bps=5.0)
+                      episode_length=126, reward_type="log_return",
+                      drawdown_penalty=0.1, turnover_penalty=0.005, transaction_cost_bps=5.0)
 
     train_env = build_vec_env(feature_store, symbols, n_envs, "train", env_kwargs)
     val_env   = TradingEnv(feature_store=feature_store, symbols=symbols, mode="val", **env_kwargs)
@@ -187,14 +194,16 @@ def train_transformer(feature_store, symbols, total_timesteps=1_000_000, n_envs=
     logger.info(f"Policy parameters: {n_params:,}")
 
     callbacks = [
-        TradingEvalCallback(val_env, eval_freq=max(10_000//n_envs,1000),
-                            n_eval_episodes=5, save_path=str(Path(save_dir)/"checkpoints"),
+        TradingEvalCallback(val_env,
+                            eval_freq=max(5_000//n_envs, 1000),
+                            n_eval_episodes=5,
+                            save_path=str(Path(save_dir)/"checkpoints"),
                             best_model_name=f"{experiment_name}_best"),
-        CheckpointCallback(save_freq=max(50_000//n_envs,5000),
-                           save_path=str(Path(save_dir)/"checkpoints"),
-                           name_prefix=experiment_name),
+        CheckpointCallback(save_freq=max(50_000//n_envs, 5000),
+                            save_path=str(Path(save_dir)/"checkpoints"),
+                            name_prefix=experiment_name),
         MetricsLoggerCallback(log_freq=1000),
-        EarlyStoppingCallback(patience=15, min_delta=0.02),
+        EarlyStoppingCallback(patience=8, min_delta=0.02),
     ]
 
     tracker = ExperimentTracker(experiment_name)
@@ -273,13 +282,14 @@ def train_curriculum(feature_store, symbols, vix=None, save_dir="models"):
 
 def evaluate_model(model, feature_store, symbols, n_eval_episodes=10, save_dir="models"):
     logger.info("\n" + "="*60 + "\nEVALUATION: Test Set\n" + "="*60)
-    env_kw = dict(initial_capital=1_000_000, lookback_window=30, episode_length=252,
-                  reward_type="sharpe", transaction_cost_bps=5.0)
+    env_kw = dict(initial_capital=1_000_000, lookback_window=30, episode_length=63,
+                  reward_type="log_return", drawdown_penalty=0.1, turnover_penalty=0.005,
+                  transaction_cost_bps=5.0)
     test_env = TradingEnv(feature_store=feature_store, symbols=symbols, mode="test", **env_kw)
 
     reports, all_pv = [], []
     for ep in range(n_eval_episodes):
-        obs, _ = test_env.reset(seed=ep * 7)
+        obs, _ = test_env.reset(seed=ep * 13 + 42)
         pv = [test_env.portfolio.total_value]
         done = False
         while not done:
@@ -287,7 +297,7 @@ def evaluate_model(model, feature_store, symbols, n_eval_episodes=10, save_dir="
             obs, _, t, tr, info = test_env.step(action)
             pv.append(info["total_value"])
             done = t or tr
-        r = compute_metrics(pd.Series(pv))
+        r = compute_metrics(pd.Series(pv, dtype=float))
         reports.append(r)
         all_pv.append(pv)
         logger.info(f"  Ep {ep+1:2d}: Return={r.total_return:+.2%} Sharpe={r.sharpe_ratio:.3f} DD={r.max_drawdown:.2%}")

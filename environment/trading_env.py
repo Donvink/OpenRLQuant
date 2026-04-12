@@ -310,11 +310,8 @@ class TradingEnv(gym.Env):
         if max_start <= 0:
             raise ValueError(f"Not enough dates for mode='{self.mode}'. Reduce episode_length.")
 
-        if self.mode == "train":
-            self.episode_start_idx = self.np_random.integers(self.lookback, max_start)
-        else:
-            # Val/test: evaluate from start (no randomness)
-            self.episode_start_idx = self.lookback
+        # Val/test: evaluate from start (no randomness)
+        self.episode_start_idx = self.np_random.integers(self.lookback, max_start)
 
         # Map to global date index
         start_date = active_dates[self.episode_start_idx]

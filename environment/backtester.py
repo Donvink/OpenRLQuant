@@ -114,8 +114,9 @@ def compute_metrics(
     if len(portfolio_values) < 5:
         return rpt
 
-    rpt.start_date = str(portfolio_values.index[0].date())
-    rpt.end_date = str(portfolio_values.index[-1].date())
+    idx = portfolio_values.index
+    rpt.start_date = str(idx[0].date()) if hasattr(idx[0], 'date') else str(idx[0])
+    rpt.end_date = str(idx[-1].date()) if hasattr(idx[-1], 'date') else str(idx[-1])
     rpt.n_trading_days = len(portfolio_values)
 
     # ── Return metrics ─────────────────────────────────────────────────────────
@@ -135,18 +136,16 @@ def compute_metrics(
     rpt.max_drawdown = float(drawdowns.min())
 
     # Drawdown duration
+    pd.set_option('future.no_silent_downcasting', True)
     in_drawdown = (drawdowns < 0)
     if in_drawdown.any():
-        dd_starts = in_drawdown & ~in_drawdown.shift(1).fillna(False)
-        dd_ends = ~in_drawdown & in_drawdown.shift(1).fillna(False)
         max_dur = 0
         start = None
-        for date, val in in_drawdown.items():
+        for idx_val, val in enumerate(in_drawdown):
             if val and start is None:
-                start = date
+                start = idx_val
             elif not val and start is not None:
-                dur = (date - start).days
-                max_dur = max(max_dur, dur)
+                max_dur = max(max_dur, idx_val - start)
                 start = None
         rpt.max_drawdown_duration = max_dur
 
