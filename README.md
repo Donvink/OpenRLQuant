@@ -11,7 +11,9 @@
 [![Stable Baselines3](https://img.shields.io/badge/SB3-2.0%2B-00b4d8?style=flat-square)](https://stable-baselines3.readthedocs.io)
 [![Gymnasium](https://img.shields.io/badge/Gymnasium-0.29%2B-black?style=flat-square)](https://gymnasium.farama.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-22c55e?style=flat-square)](LICENSE)
-[![Stars](https://img.shields.io/github/stars/yourusername/OpenRLQuant?style=flat-square&color=fbbf24)](https://github.com/yourusername/OpenRLQuant/stargazers)
+[![Stars](https://img.shields.io/github/stars/Donvink/OpenRLQuant?style=flat-square&color=fbbf24)](https://github.com/Donvink/OpenRLQuant/stargazers)
+
+**[🌐 Project Homepage](https://Donvink.github.io/OpenRLQuant)** · **[📖 Documentation](#)** · **[🚀 Quickstart](#quickstart)**
 
 </div>
 
@@ -119,7 +121,7 @@ pipeline = RetrainingPipeline(
 
 ```bash
 # 1. Clone & install
-git clone https://github.com/yourusername/OpenRLQuant.git
+git clone https://github.com/Donvink/OpenRLQuant.git
 cd OpenRLQuant
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
@@ -292,7 +294,7 @@ Contributions are welcome. Please open an issue first to discuss what you'd like
 
 ```bash
 # Development setup
-git clone https://github.com/yourusername/OpenRLQuant.git
+git clone https://github.com/Donvink/OpenRLQuant.git
 cd OpenRLQuant
 pip install -r requirements.txt
 python -m pytest tests/ -v

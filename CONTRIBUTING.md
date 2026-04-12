@@ -21,7 +21,7 @@ First off, thank you for considering contributing. This is an open research proj
 ## Development Setup
 
 ```bash
-git clone https://github.com/yourusername/OpenRLQuant.git
+git clone https://github.com/Donvink/OpenRLQuant.git
 cd OpenRLQuant
 
 python -m venv .venv
