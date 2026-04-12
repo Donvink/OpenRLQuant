@@ -205,3 +205,21 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Runtime generated
+logs/
+models/
+data/cache/
+data/processed/
+data/raw/
+
+# IDE
+.vscode/
+.idea/
+
+# Archive
+archive/
+
+# OS
+.DS_Store
+Thumbs.db

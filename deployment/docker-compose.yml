@@ -1,0 +1,122 @@
+version: "3.9"
+
+# ─── RL Trader Production Stack ────────────────────────────────────────────────
+# Services:
+#   trader    — main trading engine + FastAPI server
+#   prometheus — metrics scraper
+#   grafana    — visualization dashboard
+#   redis      — fast state cache / pub-sub for position updates
+#
+# Quick start (paper trading):
+#   cp .env.example .env          # fill in your Alpaca paper API keys
+#   docker compose up -d
+#   open http://localhost:3000    # Grafana dashboard (admin/admin)
+#   open http://localhost:8000/docs  # FastAPI docs
+#
+# Production (live trading):
+#   BROKER_MODE=live docker compose up -d
+# ──────────────────────────────────────────────────────────────────────────────
+
+services:
+
+  # ── Main Trading Engine ─────────────────────────────────────────────────────
+  trader:
+    build:
+      context: ..
+      dockerfile: deployment/Dockerfile
+    container_name: rl_trader
+    restart: unless-stopped
+    env_file: ../.env
+    environment:
+      - BROKER_MODE=${BROKER_MODE:-paper_local}
+      - N_STOCKS=${N_STOCKS:-8}
+      - INITIAL_CAPITAL=${INITIAL_CAPITAL:-100000}
+      - CYCLE_INTERVAL=${CYCLE_INTERVAL:-1800}
+      - DRY_RUN=${DRY_RUN:-true}
+      - LOG_LEVEL=INFO
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ../models:/app/models:ro          # trained model weights (read-only)
+      - ../data:/app/data                 # feature store cache
+      - ../logs:/app/logs                 # log files
+      - trader_state:/app/state           # persistent state
+    ports:
+      - "8000:8000"   # FastAPI REST API
+      - "9090:9090"   # Prometheus metrics
+    networks:
+      - trader_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8G
+        reservations:
+          cpus: "2"
+          memory: 4G
+
+  # ── Prometheus ──────────────────────────────────────────────────────────────
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    container_name: rl_prometheus
+    restart: unless-stopped
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=90d"
+      - "--web.enable-lifecycle"
+    ports:
+      - "9091:9090"   # avoid conflict with trader's :9090
+    networks:
+      - trader_net
+
+  # ── Grafana ─────────────────────────────────────────────────────────────────
+  grafana:
+    image: grafana/grafana:10.2.0
+    container_name: rl_grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/var/lib/grafana/dashboards/trader.json
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana_dashboard.json:/var/lib/grafana/dashboards/trader.json:ro
+      - ./grafana_datasource.yml:/etc/grafana/provisioning/datasources/prometheus.yml:ro
+    ports:
+      - "3000:3000"
+    networks:
+      - trader_net
+    depends_on:
+      - prometheus
+
+  # ── Redis (state cache) ─────────────────────────────────────────────────────
+  redis:
+    image: redis:7.2-alpine
+    container_name: rl_redis
+    restart: unless-stopped
+    command: redis-server --maxmemory 512mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - trader_net
+
+volumes:
+  trader_state:
+  prometheus_data:
+  grafana_data:
+  redis_data:
+
+networks:
+  trader_net:
+    driver: bridge

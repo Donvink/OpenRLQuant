@@ -1,0 +1,48 @@
+# RL Trading System - Phase 1 Requirements
+# Install: pip install -r requirements.txt
+
+# ── Core Data ──────────────────────────────────────────────────────────────────
+yfinance>=0.2.40             # Free market data (primary source for Phase 1)
+pandas>=2.0.0
+numpy>=1.24.0
+requests>=2.31.0
+
+# ── RL Framework ──────────────────────────────────────────────────────────────
+gymnasium>=0.29.0            # OpenAI Gym successor
+stable-baselines3>=2.2.0    # PPO, SAC, TD3 implementations
+torch>=2.0.0                # PyTorch backend (CPU works for Phase 1)
+
+# ── Feature Engineering ────────────────────────────────────────────────────────
+pandas-ta>=0.3.14b           # Technical indicators (pure Python)
+scikit-learn>=1.3.0          # Preprocessing, metrics
+
+# ── NLP Sentiment (optional for Phase 1, required for Phase 2) ───────────────
+# transformers>=4.36.0       # FinBERT (uncomment when ready)
+# torch>=2.0.0               # Already listed above
+
+# ── Data Storage ──────────────────────────────────────────────────────────────
+pyarrow>=14.0.0              # Parquet file support
+fastparquet>=2023.10.1       # Alternative parquet engine
+
+# ── Backtesting ────────────────────────────────────────────────────────────────
+# vectorbt>=0.26.0           # Fast vectorized backtesting (optional)
+
+# ── Visualization ─────────────────────────────────────────────────────────────
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# ── Experiment Tracking ────────────────────────────────────────────────────────
+mlflow>=2.9.0                # Experiment tracking (Phase 2+)
+
+# ── Utilities ──────────────────────────────────────────────────────────────────
+python-dotenv>=1.0.0         # Load .env files for API keys
+tqdm>=4.66.0                 # Progress bars
+loguru>=0.7.0                # Better logging (optional)
+
+# ── Optional: Trading Calendar ────────────────────────────────────────────────
+# pandas-market-calendars>=4.3.0  # Precise NYSE trading days
+
+# ── Optional: Production Data Sources ────────────────────────────────────────
+# polygon-api-client>=1.13.0      # Polygon.io official client
+# finnhub-python>=2.4.19          # Finnhub official client
+# alpaca-py>=0.20.0               # Alpaca trading API (Phase 4)

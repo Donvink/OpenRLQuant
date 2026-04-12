@@ -1,0 +1,157 @@
+# OpenRLQuant — GitHub Project Metadata
+# 以下内容用于配置 GitHub 仓库各项设置
+
+# ── 仓库描述（About 栏）────────────────────────────────────────────
+description: |
+  Production-grade reinforcement learning framework for quantitative US equity trading.
+  PPO + Transformer policy, multi-layer risk management, live Alpaca execution, 
+  auto-retraining with Champion/Challenger, and full monitoring stack.
+
+# ── Topics / Tags ────────────────────────────────────────────────────
+topics:
+  - reinforcement-learning
+  - quantitative-trading
+  - algorithmic-trading
+  - deep-learning
+  - pytorch
+  - stable-baselines3
+  - gymnasium
+  - alpaca
+  - portfolio-optimization
+  - time-series
+  - transformer
+  - ppo
+  - financial-ml
+  - backtesting
+  - risk-management
+
+# ── Website ──────────────────────────────────────────────────────────
+website: ""   # 可以填 GitHub Pages 地址
+
+# ── Issue 标签配置 ───────────────────────────────────────────────────
+labels:
+  - name: "bug"
+    color: "d73a4a"
+    description: "Something isn't working"
+
+  - name: "enhancement"
+    color: "0075ca"
+    description: "New feature or improvement"
+
+  - name: "look-ahead-bias"
+    color: "e4e669"
+    description: "Feature uses future data — critical bug"
+
+  - name: "data-quality"
+    color: "0e8a16"
+    description: "Issues with market data ingestion or cleaning"
+
+  - name: "performance"
+    color: "f9d0c4"
+    description: "Training speed, memory, or inference optimization"
+
+  - name: "good first issue"
+    color: "7057ff"
+    description: "Good for newcomers"
+
+  - name: "research"
+    color: "c2e0c6"
+    description: "New strategy idea or academic paper discussion"
+
+  - name: "documentation"
+    color: "0075ca"
+    description: "Improvements or additions to documentation"
+
+  - name: "phase-1"
+    color: "3b82f6"
+    description: "Data pipeline and feature engineering"
+
+  - name: "phase-2"
+    color: "10b981"
+    description: "RL training and policy network"
+
+  - name: "phase-3"
+    color: "f59e0b"
+    description: "Live execution and monitoring"
+
+  - name: "phase-4"
+    color: "8b5cf6"
+    description: "Automation, ensemble, scheduling"
+
+# ── Bug Report Template ──────────────────────────────────────────────
+bug_report_template: |
+  **Describe the bug**
+  A clear description of what the bug is.
+
+  **To Reproduce**
+  ```bash
+  # Exact command that caused the error
+  python run_phase1.py --mode quick
+  ```
+
+  **Full Traceback**
+  ```
+  paste traceback here
+  ```
+
+  **Environment**
+  - OS: [e.g. macOS 14.2, Ubuntu 22.04]
+  - Python: [e.g. 3.11.4]
+  - Key package versions:
+    ```
+    pip show stable-baselines3 torch gymnasium yfinance | grep Version
+    ```
+
+  **Expected behavior**
+  What you expected to happen.
+
+  **Additional context**
+  Any other context about the problem.
+
+# ── Feature Request Template ─────────────────────────────────────────
+feature_request_template: |
+  **Is your feature request related to a problem?**
+  A clear description of the problem. E.g. "I'm frustrated when..."
+
+  **Describe the solution you'd like**
+  A clear description of what you want to happen.
+
+  **Relevant papers or references**
+  Link to any academic papers, blog posts, or similar implementations.
+
+  **Which phase does this affect?**
+  - [ ] Phase 1 (Data & Features)
+  - [ ] Phase 2 (RL Training)
+  - [ ] Phase 3 (Live Execution)
+  - [ ] Phase 4 (Automation)
+  - [ ] All phases
+
+  **Are you willing to implement this?**
+  - [ ] Yes, I'd like to submit a PR
+  - [ ] I can help review but not implement
+  - [ ] Just suggesting
+
+# ── Pull Request Template ─────────────────────────────────────────────
+pull_request_template: |
+  ## Summary
+  Brief description of what this PR does.
+
+  ## Type of change
+  - [ ] Bug fix (non-breaking)
+  - [ ] New feature (non-breaking)
+  - [ ] Breaking change
+  - [ ] Documentation only
+
+  ## Checklist
+  - [ ] Tests pass (`python -m pytest tests/ -v`)
+  - [ ] Phase 1 smoke test passes (`python run_phase1.py --mode quick --use-synthetic`)
+  - [ ] No look-ahead bias introduced
+  - [ ] Docstrings added for new public functions
+  - [ ] `black .` and `ruff check .` pass
+
+  ## Look-ahead bias check
+  If you modified `features/feature_engineer.py` or `data/market_data.py`,
+  describe how you verified no future data is used in feature computation.
+
+  ## Testing
+  Describe how you tested your changes.

@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OpenRLQuant</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Clash+Display:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg: #050810;
+  --surface: #0a0f1e;
+  --surface2: #0f1628;
+  --border: #1a2440;
+  --accent: #3b82f6;
+  --accent2: #10b981;
+  --accent3: #f59e0b;
+  --accent4: #8b5cf6;
+  --text: #e2e8f0;
+  --muted: #475569;
+  --dim: #1e293b;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* animated starfield */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(1px 1px at 20% 30%, rgba(59,130,246,0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 80% 10%, rgba(16,185,129,0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 50% 80%, rgba(139,92,246,0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 10% 60%, rgba(245,158,11,0.2) 0%, transparent 100%),
+    radial-gradient(1px 1px at 90% 70%, rgba(59,130,246,0.2) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── HERO ── */
+.hero {
+  padding: 80px 0 60px;
+  text-align: center;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: 6px 16px;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 40px;
+}
+
+.hero-badge .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent2);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16,185,129,0.4); }
+  50% { opacity: 0.7; box-shadow: 0 0 0 4px rgba(16,185,129,0); }
+}
+
+.wordmark {
+  font-size: clamp(48px, 9vw, 96px);
+  font-weight: 700;
+  letter-spacing: -3px;
+  line-height: 0.95;
+  margin-bottom: 8px;
+}
+
+.wordmark .open { color: var(--muted); }
+.wordmark .rl { color: var(--accent); }
+.wordmark .quant { color: var(--text); }
+
+.tagline {
+  font-size: 14px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  margin-bottom: 40px;
+}
+
+.badges {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 48px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 4px 12px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.badge .b-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+}
+
+.hero-cta {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-decoration: none;
+  border: 1px solid;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+.btn-primary:hover { background: #2563eb; }
+
+.btn-secondary {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--muted);
+}
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── CODE BLOCK ── */
+.code-hero {
+  margin: 0 auto 80px;
+  max-width: 800px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.code-bar {
+  background: var(--surface2);
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.code-bar .dot { width: 10px; height: 10px; border-radius: 50%; }
+.code-bar .d1 { background: #ef4444; }
+.code-bar .d2 { background: #f59e0b; }
+.code-bar .d3 { background: #10b981; }
+.code-bar .label { margin-left: 8px; font-size: 11px; color: var(--muted); }
+
+.code-body {
+  padding: 20px 24px;
+  font-size: 12px;
+  line-height: 1.8;
+  overflow-x: auto;
+}
+
+.c-comment { color: #3b4f6e; }
+.c-keyword { color: #8b5cf6; }
+.c-fn { color: #3b82f6; }
+.c-str { color: #10b981; }
+.c-num { color: #f59e0b; }
+.c-var { color: #e2e8f0; }
+.c-op { color: #475569; }
+
+/* ── PHASES ── */
+.section { padding: 60px 0; }
+
+.section-label {
+  font-size: 10px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 32px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.phases {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin-bottom: 60px;
+}
+
+.phase {
+  background: var(--surface);
+  padding: 28px;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.2s;
+}
+
+.phase:hover { background: var(--surface2); }
+
+.phase::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+}
+
+.phase:nth-child(1)::before { background: var(--accent); }
+.phase:nth-child(2)::before { background: var(--accent2); }
+.phase:nth-child(3)::before { background: var(--accent3); }
+.phase:nth-child(4)::before { background: var(--accent4); }
+
+.phase-num {
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.phase-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 12px;
+  letter-spacing: -0.3px;
+}
+
+.phase-desc {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.7;
+  margin-bottom: 16px;
+}
+
+.phase-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.phase-tag {
+  font-size: 10px;
+  padding: 2px 8px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+/* ── FEATURES GRID ── */
+.features {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 60px;
+}
+
+.feature {
+  border: 1px solid var(--border);
+  padding: 20px;
+  background: var(--surface);
+}
+
+.feature-icon {
+  font-size: 20px;
+  margin-bottom: 12px;
+}
+
+.feature-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+  letter-spacing: 0.5px;
+}
+
+.feature-desc {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* ── METRICS ── */
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+  margin-bottom: 60px;
+}
+
+.metric {
+  background: var(--surface);
+  padding: 24px 20px;
+  text-align: center;
+}
+
+.metric-val {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  margin-bottom: 4px;
+}
+
+.metric-label {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ── INSTALL ── */
+.install-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  overflow: hidden;
+  margin-bottom: 60px;
+}
+
+.install-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+
+.install-tab {
+  padding: 10px 20px;
+  font-size: 11px;
+  color: var(--muted);
+  border-right: 1px solid var(--border);
+  cursor: pointer;
+}
+
+.install-tab.active {
+  color: var(--accent);
+  background: var(--surface2);
+}
+
+.install-code {
+  padding: 20px 24px;
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+/* ── RISK LAYERS ── */
+.risk-table {
+  border: 1px solid var(--border);
+  overflow: hidden;
+  margin-bottom: 60px;
+}
+
+.risk-row {
+  display: grid;
+  grid-template-columns: 80px 1fr 1fr 1fr;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 11px;
+}
+
+.risk-row:last-child { border-bottom: none; }
+.risk-row.header { background: var(--surface2); color: var(--muted); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; }
+
+.risk-cell {
+  padding: 12px 16px;
+  border-right: 1px solid var(--border);
+  color: var(--muted);
+}
+.risk-cell:last-child { border-right: none; }
+.risk-cell:first-child { color: var(--text); font-weight: 500; }
+
+.risk-dot {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+/* ── FOOTER ── */
+.footer {
+  border-top: 1px solid var(--border);
+  padding: 32px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.footer-links { display: flex; gap: 24px; }
+.footer-links a { color: var(--muted); text-decoration: none; }
+.footer-links a:hover { color: var(--accent); }
+
+.disclaimer {
+  background: rgba(245,158,11,0.05);
+  border: 1px solid rgba(245,158,11,0.2);
+  padding: 16px 20px;
+  font-size: 11px;
+  color: rgba(245,158,11,0.7);
+  line-height: 1.6;
+  margin-bottom: 32px;
+}
+
+@media (max-width: 768px) {
+  .phases { grid-template-columns: 1fr; }
+  .features { grid-template-columns: repeat(2, 1fr); }
+  .metrics { grid-template-columns: repeat(2, 1fr); }
+  .risk-row { grid-template-columns: 1fr; }
+  .footer { flex-direction: column; gap: 16px; text-align: center; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-badge">
+      <span class="dot"></span>
+      Open Source · MIT License · Production Ready
+    </div>
+
+    <div class="wordmark">
+      <span class="open">Open</span><span class="rl">RL</span><span class="quant">Quant</span>
+    </div>
+    <div class="tagline">Reinforcement Learning for Quantitative US Equity Trading</div>
+
+    <div class="badges">
+      <span class="badge"><span class="b-dot" style="background:#3b82f6"></span>Python 3.10+</span>
+      <span class="badge"><span class="b-dot" style="background:#ee4c2c"></span>PyTorch 2.0+</span>
+      <span class="badge"><span class="b-dot" style="background:#00b4d8"></span>Stable-Baselines3</span>
+      <span class="badge"><span class="b-dot" style="background:#22c55e"></span>MIT License</span>
+      <span class="badge"><span class="b-dot" style="background:#f59e0b"></span>40 Python Files</span>
+    </div>
+
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="#">⭐ Star on GitHub</a>
+      <a class="btn btn-secondary" href="#">📖 Documentation</a>
+      <a class="btn btn-secondary" href="#">🚀 Quick Start</a>
+    </div>
+  </div>
+
+  <!-- CODE HERO -->
+  <div class="code-hero">
+    <div class="code-bar">
+      <div class="dot d1"></div><div class="dot d2"></div><div class="dot d3"></div>
+      <span class="label">quickstart.py</span>
+    </div>
+    <div class="code-body">
+<span class="c-comment"># 1. Build feature store from real market data</span>
+<span class="c-var">feature_store</span> <span class="c-op">=</span> <span class="c-fn">FeaturePipeline</span>()<span class="c-op">.</span><span class="c-fn">build</span>(market_data, vix<span class="c-op">=</span>vix)
+
+<span class="c-comment"># 2. Train PPO agent — MLP baseline or Transformer</span>
+<span class="c-var">model</span> <span class="c-op">=</span> <span class="c-fn">train_mlp</span>(feature_store, symbols<span class="c-op">=</span>[<span class="c-str">"AAPL"</span>, <span class="c-str">"MSFT"</span>, <span class="c-str">"NVDA"</span>, <span class="c-str">"JPM"</span>],
+               timesteps<span class="c-op">=</span><span class="c-num">1_000_000</span>, reward_type<span class="c-op">=</span><span class="c-str">"sharpe"</span>)
+
+<span class="c-comment"># 3. Launch autonomous trading system</span>
+<span class="c-fn">python</span> run_phase4.py --mode paper --model-path models/ppo_final
+<span class="c-comment"># → API:     http://localhost:8000/docs</span>
+<span class="c-comment"># → Grafana: http://localhost:3000</span>
+<span class="c-comment"># → Metrics: http://localhost:9090/metrics</span>
+    </div>
+  </div>
+
+  <!-- PHASES -->
+  <div class="section">
+    <div class="section-label">Four-Phase Architecture</div>
+    <div class="phases">
+      <div class="phase">
+        <div class="phase-num">PHASE 01</div>
+        <div class="phase-title">Data & Features</div>
+        <div class="phase-desc">Multi-source data ingestion with disk caching. 88 features per stock: technical indicators, macro regime, NLP sentiment via FinBERT. Rolling z-score normalization with zero look-ahead bias.</div>
+        <div class="phase-tags">
+          <span class="phase-tag">Polygon.io</span>
+          <span class="phase-tag">Yahoo Finance</span>
+          <span class="phase-tag">Finnhub</span>
+          <span class="phase-tag">FinBERT</span>
+          <span class="phase-tag">TimescaleDB</span>
+        </div>
+      </div>
+      <div class="phase">
+        <div class="phase-num">PHASE 02</div>
+        <div class="phase-title">RL Training</div>
+        <div class="phase-desc">PPO with MLP baseline or Transformer policy. Per-stock temporal encoder + cross-asset attention. 4-stage curriculum learning. Optuna hyperparameter search. Walk-forward validation.</div>
+        <div class="phase-tags">
+          <span class="phase-tag">PPO</span>
+          <span class="phase-tag">Transformer</span>
+          <span class="phase-tag">Curriculum</span>
+          <span class="phase-tag">Optuna</span>
+          <span class="phase-tag">MLflow</span>
+        </div>
+      </div>
+      <div class="phase">
+        <div class="phase-num">PHASE 03</div>
+        <div class="phase-title">Live Execution</div>
+        <div class="phase-desc">Alpaca paper and live trading. 7-layer risk management. FastAPI inference server with 15 endpoints. Prometheus + Grafana monitoring. Docker Compose one-command deployment.</div>
+        <div class="phase-tags">
+          <span class="phase-tag">Alpaca API</span>
+          <span class="phase-tag">FastAPI</span>
+          <span class="phase-tag">Prometheus</span>
+          <span class="phase-tag">Grafana</span>
+          <span class="phase-tag">Docker</span>
+        </div>
+      </div>
+      <div class="phase">
+        <div class="phase-num">PHASE 04</div>
+        <div class="phase-title">Autonomous Ops</div>
+        <div class="phase-desc">CUSUM + KS-test drift detection. Champion/Challenger retraining with Welch's t-test. UCB1 ensemble voting. 7 scheduled jobs. Slack, Email & webhook alerts.</div>
+        <div class="phase-tags">
+          <span class="phase-tag">CUSUM Drift</span>
+          <span class="phase-tag">Ensemble</span>
+          <span class="phase-tag">UCB1</span>
+          <span class="phase-tag">APScheduler</span>
+          <span class="phase-tag">Slack</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <div class="section">
+    <div class="section-label">Key Capabilities</div>
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">🧠</div>
+        <div class="feature-title">Transformer Policy</div>
+        <div class="feature-desc">Per-stock CLS-token temporal encoder + multi-head cross-asset attention. Learns inter-stock correlations implicitly.</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📈</div>
+        <div class="feature-title">Realistic Backtest</div>
+        <div class="feature-desc">Adjusted OHLCV, 5bps commission, sqrt(size/ADV) market impact, bid-ask spread. No look-ahead bias in features.</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🎓</div>
+        <div class="feature-title">Curriculum Learning</div>
+        <div class="feature-desc">4 stages from calm bull markets to full crisis. Advances only when Sharpe threshold is met on 3 consecutive evals.</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🛡️</div>
+        <div class="feature-title">7-Layer Risk Control</div>
+        <div class="feature-desc">Portfolio halt, daily halt, VIX scaling, position caps, sector limits, liquidity filter, Kelly sizing — independent of agent.</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🔄</div>
+        <div class="feature-title">Auto-Retraining</div>
+        <div class="feature-desc">Champion/Challenger with Welch's t-test. New model must beat old by Δ Sharpe ≥ 0.05 at p < 0.10 to be promoted.</div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🎲</div>
+        <div class="feature-title">UCB1 Ensemble</div>
+        <div class="feature-desc">Multi-armed bandit weighting. Disagreement-aware position scaling: high model variance → reduced position size.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- METRICS -->
+  <div class="section">
+    <div class="section-label">Performance Targets</div>
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-val" style="color:#10b981">20%+</div>
+        <div class="metric-label">Annual Return</div>
+      </div>
+      <div class="metric">
+        <div class="metric-val" style="color:#3b82f6">1.2+</div>
+        <div class="metric-label">Sharpe Ratio</div>
+      </div>
+      <div class="metric">
+        <div class="metric-val" style="color:#ef4444">&lt;15%</div>
+        <div class="metric-label">Max Drawdown</div>
+      </div>
+      <div class="metric">
+        <div class="metric-val" style="color:#8b5cf6">8%+</div>
+        <div class="metric-label">Alpha vs SPY</div>
+      </div>
+    </div>
+    <p style="font-size:10px;color:var(--muted);text-align:center;margin-top:-40px;margin-bottom:60px">
+      Aspirational targets. Past backtest performance does not guarantee future results.
+    </p>
+  </div>
+
+  <!-- RISK TABLE -->
+  <div class="section">
+    <div class="section-label">Risk Management Layers</div>
+    <div class="risk-table">
+      <div class="risk-row header">
+        <div class="risk-cell">Layer</div>
+        <div class="risk-cell">Method</div>
+        <div class="risk-cell">Trigger</div>
+        <div class="risk-cell">Response</div>
+      </div>
+      <div class="risk-row">
+        <div class="risk-cell"><span class="risk-dot" style="background:#ef4444"></span>1</div>
+        <div class="risk-cell">Portfolio drawdown halt</div>
+        <div class="risk-cell">Total DD &gt; 15%</div>
+        <div class="risk-cell">Liquidate all, stop trading</div>
+      </div>
+      <div class="risk-row">
+        <div class="risk-cell"><span class="risk-dot" style="background:#ef4444"></span>2</div>
+        <div class="risk-cell">Daily drawdown halt</div>
+        <div class="risk-cell">Intraday DD &gt; 8%</div>
+        <div class="risk-cell">Stop trading today</div>
+      </div>
+      <div class="risk-row">
+        <div class="risk-cell"><span class="risk-dot" style="background:#f59e0b"></span>3</div>
+        <div class="risk-cell">VIX regime scaling</div>
+        <div class="risk-cell">VIX &gt; 30 / &gt; 40</div>
+        <div class="risk-cell">60% / 30% position scale</div>
+      </div>
+      <div class="risk-row">
+        <div class="risk-cell"><span class="risk-dot" style="background:#f59e0b"></span>4</div>
+        <div class="risk-cell">Position cap</div>
+        <div class="risk-cell">Single stock &gt; 10% NAV</div>
+        <div class="risk-cell">Hard-cap, reduce to limit</div>
+      </div>
+      <div class="risk-row">
+        <div class="risk-cell"><span class="risk-dot" style="background:#10b981"></span>5</div>
+        <div class="risk-cell">Sector concentration</div>
+        <div class="risk-cell">Sector &gt; 30%</div>
+        <div class="risk-cell">Scale down sector weights</div>
+      </div>
+      <div class="risk-row">
+        <div class="risk-cell"><span class="risk-dot" style="background:#10b981"></span>6</div>
+        <div class="risk-cell">Liquidity filter</div>
+        <div class="risk-cell">Order &gt; 1% of ADV</div>
+        <div class="risk-cell">Reduce to max participation</div>
+      </div>
+      <div class="risk-row">
+        <div class="risk-cell"><span class="risk-dot" style="background:#3b82f6"></span>7</div>
+        <div class="risk-cell">Kelly sizing</div>
+        <div class="risk-cell">Exposure &gt; 25% Kelly f*</div>
+        <div class="risk-cell">Scale total exposure down</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INSTALL -->
+  <div class="section">
+    <div class="section-label">Installation</div>
+    <div class="install-block">
+      <div class="install-tabs">
+        <div class="install-tab active">Quick Start</div>
+        <div class="install-tab">Docker</div>
+      </div>
+      <div class="install-code">
+<span class="c-comment"># Clone and install</span>
+git clone https://github.com/yourusername/OpenRLQuant.git
+cd OpenRLQuant && pip install -r requirements.txt
+
+<span class="c-comment"># Configure free API keys (.env)</span>
+cp .env.example .env   <span class="c-comment"># add POLYGON_API_KEY + FINNHUB_KEY + ALPACA_*</span>
+
+<span class="c-comment"># Phase 1: validate data pipeline (~5 min)</span>
+python run_phase1.py --mode quick
+
+<span class="c-comment"># Phase 2: train PPO agent (CPU ~30 min)</span>
+python train/train_ppo.py --mode mlp --timesteps 500000
+
+<span class="c-comment"># Phase 4: launch full autonomous system</span>
+python run_phase4.py --mode paper --dry-run
+      </div>
+    </div>
+  </div>
+
+  <!-- DISCLAIMER -->
+  <div class="disclaimer">
+    ⚠️ OpenRLQuant is for educational and research purposes only. Backtested performance is not indicative of future results.
+    US equity trading involves substantial risk of capital loss. Paper trade for at least 3 months before using real funds.
+    The authors assume no liability for financial losses of any kind.
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div>OpenRLQuant — MIT License</div>
+    <div class="footer-links">
+      <a href="#">GitHub</a>
+      <a href="#">Docs</a>
+      <a href="#">Issues</a>
+      <a href="#">Discussions</a>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
