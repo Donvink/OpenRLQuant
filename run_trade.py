@@ -1,13 +1,20 @@
 """
-run_phase3.py
-──────────────
-Phase 3: Production Execution System
+run_trade.py
+─────────────
+第三步：实盘/模拟执行
+
+Input:   models/           训练好的模型（由 run_train.py 生成）
+         data/processed/   特征文件（由 run_data.py 生成）
+         .env              ALPACA_API_KEY / ALPACA_SECRET_KEY（alpaca/live 模式需要）
+Output:  logs/trade_log.csv   每个 cycle 的下单记录
+         logs/engine_state.json  最新引擎状态快照
+         monitoring/       Prometheus 指标 + Grafana 面板（自动生成，无需 commit）
 
 Modes:
-  --mode paper      Paper trading (local simulation, no real orders)
-  --mode alpaca     Alpaca paper trading (requires API keys)
-  --mode live       Live trading ⚠️ REAL MONEY (requires funded Alpaca account)
-  --mode backtest   Historical simulation with execution engine
+  --mode paper      本地模拟撮合，无需 API Key，适合初步验证
+  --mode alpaca     Alpaca 纸交易，使用真实行情模拟成交（需 .env）
+  --mode live       Alpaca 实盘 ⚠️ 真实资金（需 funded 账户）
+  --mode backtest   用历史数据跑完整执行栈，验证下单逻辑
 
 Components started:
   1. FastAPI REST server (port 8000)
@@ -17,15 +24,18 @@ Components started:
   5. State persistence (JSON checkpoints)
 
 Usage:
-  # Safest first run — local paper trading, dry run (no orders submitted):
-  python run_phase3.py --mode paper --dry-run \
+  # 最安全的首次运行 — 本地模拟，dry-run（不真正下单）:
+  python run_trade.py --mode paper --dry-run \\
       --model-path models/ppo_mlp_final --n-stocks 5
 
-  # Paper trading with Alpaca (needs .env with ALPACA_API_KEY):
-  python run_phase3.py --mode alpaca --model-path models/ppo_mlp_final
+  # Alpaca 纸交易（需 .env 配置 API Key）:
+  python run_trade.py --mode alpaca --model-path models/ppo_mlp_final
 
-  # Full backtest of execution system on 2024 data:
-  python run_phase3.py --mode backtest --start 2024-01-01 --end 2024-12-31
+  # 历史数据回测执行栈:
+  python run_trade.py --mode backtest --start 2024-01-01 --end 2024-12-31
+
+Next:
+  python run_autopilot.py --mode paper   # 开启自动化运维
 """
 from dotenv import load_dotenv
 load_dotenv()

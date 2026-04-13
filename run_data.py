@@ -1,7 +1,11 @@
 """
-run_phase1.py
-──────────────
-Phase 1 主运行脚本：数据采集 → 特征工程 → 环境验证 → 基线回测
+run_data.py
+────────────
+第一步：数据采集 → 特征工程 → 环境验证 → 基线回测
+
+Input:   无（从 Yahoo Finance / Polygon.io 下载原始行情）
+Output:  data/processed/   特征文件，供 run_train.py 使用
+         logs/phase1.log
 
 运行步骤:
   1. 数据下载与缓存（Yahoo Finance，无需API Key）
@@ -12,13 +16,16 @@ Phase 1 主运行脚本：数据采集 → 特征工程 → 环境验证 → 基
 
 Usage:
     # 快速验证（小数据集）
-    python run_phase1.py --mode quick
+    python run_data.py --mode quick
 
     # 完整数据集
-    python run_phase1.py --mode full
+    python run_data.py --mode full
 
     # 指定股票
-    python run_phase1.py --symbols AAPL MSFT GOOGL NVDA --start 2020-01-01
+    python run_data.py --symbols AAPL MSFT GOOGL NVDA --start 2020-01-01
+
+Next:
+    python run_train.py --mode mlp
 """
 
 import os

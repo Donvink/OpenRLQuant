@@ -1,23 +1,35 @@
 """
-run_phase4.py
-──────────────
-Phase 4: Fully Autonomous Trading System
+run_autopilot.py
+─────────────────
+第四步：全自动运维（自动再训练 + 集成投票 + 告警）
 
-Integrates all Phase 1-4 components:
-  Phase 1: Data pipeline + feature engineering
-  Phase 2: PPO training + curriculum
-  Phase 3: Live execution + monitoring
-  Phase 4: Auto-retraining + ensemble + scheduling + alerts
+Input:   models/           已有模型（没有则自动训练）
+         data/processed/   特征文件（由 run_data.py 生成）
+         .env              ALPACA_API_KEY、Slack/Email 告警配置（可选）
+Output:  logs/phase4_report.json   运行报告
+         models/archive/           历史模型归档
+
+集成所有步骤的组件:
+  run_data.py     → 数据管道 + 特征工程
+  run_train.py    → PPO 训练 + Curriculum
+  run_trade.py    → 实盘执行 + 监控
+  run_autopilot.py → 自动再训练 + Ensemble + 调度 + 告警
+
+Modes:
+  --mode paper    本地模拟，适合验证全流程
+  --mode alpaca   Alpaca 纸交易，接近生产环境
+  --mode live     实盘 ⚠️ 真实资金
+  --mode demo     快速演示所有 Phase 4 功能（3 个 cycle，不下真实订单）
 
 Usage:
-  # Start full autonomous system (paper trading, safe defaults)
-  python run_phase4.py --mode paper --use-synthetic
+  # 演示所有功能（推荐首次运行）
+  python run_autopilot.py --mode demo --max-cycles 3
 
-  # Production paper with Alpaca (needs .env)
-  python run_phase4.py --mode alpaca
+  # 生产纸交易（需 .env）
+  python run_autopilot.py --mode alpaca
 
-  # Single run with all components demo
-  python run_phase4.py --mode demo --max-cycles 3
+  # 本地全自动（无需 API Key）
+  python run_autopilot.py --mode paper --use-synthetic
 """
 
 import argparse
