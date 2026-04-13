@@ -27,6 +27,8 @@ Usage:
   # Full backtest of execution system on 2024 data:
   python run_phase3.py --mode backtest --start 2024-01-01 --end 2024-12-31
 """
+from dotenv import load_dotenv
+load_dotenv()
 
 import argparse
 import json

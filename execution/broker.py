@@ -137,6 +137,17 @@ class BaseBroker(ABC):
     def get_latest_price(self, symbol: str) -> float:
         ...
 
+    def get_open_orders(self) -> List[Order]:
+        try:
+            from alpaca.trading.requests import GetOrdersRequest
+            from alpaca.trading.enums import QueryOrderStatus
+            req = GetOrdersRequest(status=QueryOrderStatus.OPEN)
+            orders = self._client.get_orders(filter=req)
+            return [self._alpaca_order_to_order(o) for o in orders]
+        except Exception as e:
+            logger.error(f"get_open_orders failed: {e}")
+            return []
+
     def submit_target_weights(
         self,
         target_weights: Dict[str, float],
@@ -154,13 +165,20 @@ class BaseBroker(ABC):
 
         target_values = {sym: w * portfolio_value for sym, w in target_weights.items()}
 
+        open_orders = self.get_open_orders()  # 新增方法
+        pending_values = {}
+        for order in open_orders:
+            sym = order.symbol
+            val = order.qty * prices.get(sym, 1.0)
+            pending_values[sym] = pending_values.get(sym, 0) + (val if order.side == "buy" else -val)
+
         orders = []
         deltas = {}  # symbol -> dollar delta
 
         all_symbols = set(target_values) | set(current_values)
         for sym in all_symbols:
             target = target_values.get(sym, 0.0)
-            current = current_values.get(sym, 0.0)
+            current = current_values.get(sym, 0.0) + pending_values.get(sym, 0.0)
             delta = target - current
             if abs(delta) >= min_order_value:
                 deltas[sym] = delta

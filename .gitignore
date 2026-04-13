@@ -212,6 +212,7 @@ models/
 data/cache/
 data/processed/
 data/raw/
+monitoring/grafana_dashboard.json
 
 # IDE
 .vscode/

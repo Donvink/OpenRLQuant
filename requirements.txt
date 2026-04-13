@@ -17,15 +17,15 @@ pandas-ta>=0.3.14b           # Technical indicators (pure Python)
 scikit-learn>=1.3.0          # Preprocessing, metrics
 
 # ── NLP Sentiment (optional for Phase 1, required for Phase 2) ───────────────
-# transformers>=4.36.0       # FinBERT (uncomment when ready)
-# torch>=2.0.0               # Already listed above
+transformers>=4.36.0       # FinBERT (uncomment when ready)
+torch>=2.0.0               # Already listed above
 
 # ── Data Storage ──────────────────────────────────────────────────────────────
 pyarrow>=14.0.0              # Parquet file support
 fastparquet>=2023.10.1       # Alternative parquet engine
 
 # ── Backtesting ────────────────────────────────────────────────────────────────
-# vectorbt>=0.26.0           # Fast vectorized backtesting (optional)
+vectorbt>=0.26.0           # Fast vectorized backtesting (optional)
 
 # ── Visualization ─────────────────────────────────────────────────────────────
 matplotlib>=3.7.0
@@ -40,9 +40,9 @@ tqdm>=4.66.0                 # Progress bars
 loguru>=0.7.0                # Better logging (optional)
 
 # ── Optional: Trading Calendar ────────────────────────────────────────────────
-# pandas-market-calendars>=4.3.0  # Precise NYSE trading days
+pandas-market-calendars>=4.3.0  # Precise NYSE trading days
 
 # ── Optional: Production Data Sources ────────────────────────────────────────
-# polygon-api-client>=1.13.0      # Polygon.io official client
-# finnhub-python>=2.4.19          # Finnhub official client
-# alpaca-py>=0.20.0               # Alpaca trading API (Phase 4)
+polygon-api-client>=1.13.0      # Polygon.io official client
+finnhub-python>=2.4.19          # Finnhub official client
+alpaca-py>=0.20.0               # Alpaca trading API (Phase 4)
